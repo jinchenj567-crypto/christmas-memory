@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#020308" />
+    <title>A Year in Light</title>
+    <style>
+      #loader {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: radial-gradient(circle at 50% 50%, #0b1124 0%, #04060f 60%, #020308 100%);
+        color: #f3d08a;
+        font: italic 26px Georgia, 'Times New Roman', serif;
+        transition: opacity 0.9s ease, visibility 0.9s;
+      }
+      #loader.done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #loader i {
+        width: 46px;
+        height: 46px;
+        background: #ffcf6a;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        filter: drop-shadow(0 0 14px rgba(255, 190, 90, 0.8));
+        animation: loader-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes loader-pulse {
+        50% {
+          transform: scale(0.82);
+          opacity: 0.6;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="loader"><i></i>merry Christmas</div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
