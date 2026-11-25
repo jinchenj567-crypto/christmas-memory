@@ -39,11 +39,29 @@
           opacity: 0.6;
         }
       }
+      #visits {
+        position: fixed;
+        left: 12px;
+        top: calc(10px + env(safe-area-inset-top));
+        z-index: 20;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: rgba(4, 6, 15, 0.55);
+        color: #f3d08a;
+        font: 12px/1.6 system-ui, sans-serif;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
     <div id="root"></div>
     <div id="loader"><i></i>Merry Christmas</div>
+    <!-- visit counter (不蒜子): counted for everyone, shown only when the address ends in ?stats -->
+    <div id="visits" hidden>浏览 <span id="busuanzi_value_site_pv">…</span> 次 · <span id="busuanzi_value_site_uv">…</span> 人</div>
+    <script>
+      if (/[?&]stats/.test(location.search)) document.getElementById('visits').hidden = false
+    </script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
