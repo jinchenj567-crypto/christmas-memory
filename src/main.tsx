@@ -9,6 +9,8 @@ import './styles.css'
 import App from './App'
 import { store } from './store'
 import { loadMemories } from './memories'
+import { startMusicOnFirstTouch } from './audio'
 
 createRoot(document.getElementById('root')!).render(<App />)
 loadMemories()
+startMusicOnFirstTouch()
