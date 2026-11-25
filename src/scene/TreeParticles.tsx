@@ -164,6 +164,11 @@ const VERT = /* glsl */ `
   uniform float uFlash[12];
   uniform vec3 uTapPoint;
   uniform float uTapAge;
+  uniform float uHold;
+  uniform vec3 uHoldPoint;
+  uniform float uRelease;
+  uniform float uRings[4];
+  uniform float uCombo;
   attribute vec4 aParam;
   attribute vec3 aStart;
   attribute vec4 aRand;
@@ -213,6 +218,13 @@ const VERT = /* glsl */ `
     q = rotY(q, (1.0 - e) * (3.4 + seed * 3.0));
     q.y += (1.0 - e) * e * 2.2 * (seed - 0.3);
     float fly = 4.0 * e * (1.0 - e); // brightest mid-flight, like sparks with a tail
+    // pressed and held: nearby lights are drawn gently toward the finger, the reach growing as it charges
+    float holdNear = 0.0;
+    if (uHold > 0.0 && kind < 2.5) {
+      float hd = length(q - uHoldPoint);
+      holdNear = 1.0 - smoothstep(0.0, 0.45 + uHold * 1.9, hd);
+      q = mix(q, uHoldPoint, holdNear * uHold * 0.22);
+    }
 
     // glow front climbing from the base to the tip
     float lit = 1.0 - smoothstep(uReveal - 0.12, uReveal, h);
@@ -229,10 +241,31 @@ const VERT = /* glsl */ `
     float memVis = mix(1.0, strength, memo);
     bright *= 1.0 + strength * 0.55;
     bright += flash * (1.2 + 1.2 * memo);
-    if (uTapAge < 1.1 && kind < 2.5) {
-      vec3 offset = p - uTapPoint - vec3(0.0, uTapAge * 0.45, 0.0);
-      float localGlow = 1.0 - smoothstep(0.01, 0.50, dot(offset, offset));
-      bright += localGlow * (1.0 - smoothstep(0.06, 1.1, uTapAge)) * 1.45;
+    // held light: glowing where pressed; once let go it climbs the tree to the star
+    bright += holdNear * uHold * 2.6 + holdNear * holdNear * uHold * 2.0;
+    float ra = uTime - uRelease;
+    if (ra > 0.0 && ra < 1.7 && kind < 2.5) {
+      float h0 = clamp(uHoldPoint.y / TREE_H, 0.0, 1.0);
+      float hf = mix(h0, 1.02, smoothstep(0.0, 1.2, ra));
+      bright += exp(-pow((h - hf) / 0.07, 2.0)) * (1.0 - smoothstep(1.2, 1.7, ra)) * 3.0;
+    }
+    // quick taps: each sends a ring of light from the base to the top; the ornaments join in
+    for (int i = 0; i < 4; i++) {
+      float rt = uTime - uRings[i];
+      if (rt > 0.0 && rt < 1.3 && kind < 1.5) bright += exp(-pow((h - rt / 1.05) / 0.06, 2.0)) * (1.0 - smoothstep(1.0, 1.3, rt)) * 3.2;
+    }
+    if (uCombo > 0.01) bright += uCombo * orn * step(0.5, fract(uTime * 2.2 + seed * 5.0)) * 1.8;
+    if (uTapAge < 1.9 && kind < 2.5) {
+      // the touched branches flare, and a wave of light spreads through the tree from there
+      vec3 offset = p - uTapPoint;
+      float d = length(offset);
+      // nearby lights catch it one after another, nearest first, each a quick twinkle
+      float near = 1.0 - smoothstep(0.0, 1.0, d);
+      float when = d * 0.5 + fract(seed * 17.0) * 0.12;
+      float catchLight = exp(-pow((uTapAge - when) / 0.1, 2.0)) * near;
+      // and one fine ripple runs out through the branches
+      float wave = exp(-pow((d - uTapAge * 2.2) / 0.09, 2.0)) * (1.0 - smoothstep(0.35, 1.2, uTapAge));
+      bright += catchLight * 4.4 + wave * 1.2 + near * near * 0.9 * (1.0 - smoothstep(0.0, 0.8, uTapAge));
     }
 
     // the light show: light runs up the garlands, rings sweep up the tree, ornaments blink in turn

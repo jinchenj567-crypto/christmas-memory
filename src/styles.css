@@ -145,23 +145,13 @@ button:focus-visible {
 }
 .tagline h1 {
   margin: 0;
-  font: italic 500 clamp(30px, 6.2vw, 90px) / 1.18 var(--serif);
-  color: var(--gold);
+  font: 400 clamp(28px, 6.4vw, 104px) / 1.25 'Great Vibes', var(--serif);
+  color: transparent; /* the canvas draws the gold lettering */
   white-space: nowrap;
 }
 .tagline canvas {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-}
-.tagline.particle-title h1 {
-  color: transparent;
-}
-.tagline.particle-title canvas {
-  opacity: 1;
-  filter: drop-shadow(0 0 12px rgba(227, 164, 90, 0.23));
+  pointer-events: none;
 }
 
 .dock {
@@ -764,7 +754,7 @@ button:focus-visible {
     inset-inline: 12px;
     width: auto;
   }
-  .tagline h1 { font-size: clamp(42px, 14vw, 66px); }
+  .tagline h1 { font-size: clamp(50px, 15.5vw, 74px); }
   .actions {
     gap: 18px;
   }

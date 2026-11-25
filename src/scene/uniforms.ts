@@ -20,7 +20,12 @@ export const U = {
   uMonth: { value: new Array(12).fill(0) as number[] }, // memory strength per month 0..1
   uFlash: { value: new Array(12).fill(0) as number[] }, // momentary glow per month
   uTapPoint: { value: new THREE.Vector3() },
-  uTapAge: { value: 1.2 },
+  uTapAge: { value: 1.9 },
+  uHold: { value: 0 }, // 0..1 while the tree is being pressed and held
+  uHoldPoint: { value: new THREE.Vector3() },
+  uRelease: { value: -99 }, // clock time the held light was let go
+  uRings: { value: [-99, -99, -99, -99] }, // clock times of rings sent up by quick taps
+  uCombo: { value: 0 }, // 0..1 while taps keep coming
 }
 
 export type Uniforms = typeof U

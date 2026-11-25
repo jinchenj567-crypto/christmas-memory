@@ -122,6 +122,8 @@ function Director() {
     star += show * (0.25 + 0.35 * Math.pow(0.5 + 0.5 * Math.sin(t * 5.2), 3))
     // a wish arriving at the top
     star += Math.exp(-Math.pow((t - fx.wish - WISH_TIME) / 0.35, 2)) * 1.3
+    // a soft flash of the star when held light arrives, or a run of taps peaks
+    star += Math.exp(-Math.pow((t - fx.star) / 0.3, 2)) * 1.0
     U.uIntro.value = gather
     U.uScatterVis.value = scatterVis
     U.uStar.value = star
