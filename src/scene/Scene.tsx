@@ -19,6 +19,7 @@ import Gifts from './Gifts'
 import Snowflakes from './Snowflakes'
 import Comet from './Comet'
 import Ignite from './Ignite'
+import Ascent from './Ascent'
 import Wish, { WISH_TIME } from './Wish'
 import FireworksShow from './FireworksShow'
 import Universe, { entryPose, focusPose, inside, photoPos, universe } from './Universe'
@@ -240,6 +241,13 @@ function Rig() {
     c.look.copy(v.look)
     camera.position.copy(c.pos)
     camera.lookAt(c.look)
+    // the star's ignition shakes the view, just for a moment
+    const sk = t - T.star
+    if (sk > 0 && sk < 0.9 && !s.review) {
+      const amp = 0.075 * Math.exp(-sk * 5.5)
+      camera.position.x += Math.sin(sk * 61) * amp
+      camera.position.y += Math.sin(sk * 47 + 1.3) * amp * 0.8
+    }
   }, -1)
   return null
 }
@@ -561,6 +569,7 @@ function World() {
         <Fireworks />
         <Comet tree={L.tree} />
         <Ignite tree={L.tree} />
+        <Ascent tree={L.tree} />
         <Wish tree={L.tree} />
         <FireworksShow />
         <Snowflakes />

@@ -856,3 +856,46 @@ button:focus-visible {
   .caption h2 { font-size: 15px; }
   .caption p { line-height: 1.6; }
 }
+
+/* after the opening: an invitation to keep the moment as a picture */
+.save-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(114px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 10px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 10px 16px;
+  border: 1px solid rgba(233, 196, 120, 0.55);
+  border-radius: 999px;
+  background: rgba(14, 16, 32, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f3d9a4;
+  font: 15px/1 'Noto Serif SC', serif;
+  letter-spacing: 0.18em;
+  box-shadow: 0 0 24px rgba(255, 196, 110, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  cursor: pointer;
+  z-index: 6;
+}
+.save-prompt.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  animation: save-glow 2.6s ease-in-out infinite;
+}
+.save-prompt svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+@keyframes save-glow {
+  50% { box-shadow: 0 0 34px rgba(255, 196, 110, 0.45); }
+}

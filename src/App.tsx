@@ -4,8 +4,8 @@ import Greeting from './Greeting'
 import { MONTHS, MONTHS_CN, addMemory, deleteMemory, formatDate, hasOwn, memories, monthCounts, readPhoto } from './memories'
 import { store, useStore, busy } from './store'
 import { setMusic } from './audio'
-import { makePoster } from './poster'
-import { clock, isWeChat } from './scene/config'
+import { makePoster, savePoster } from './poster'
+import { clock, isWeChat, mobile } from './scene/config'
 import { endReview, enterGlobe, focusMonth, focusStep, leaveGlobe, startReview } from './scene/actions'
 import { RV, reviewFrame, reviewPlan } from './scene/Review'
 import { fireworksShow, lightShow, makeWish, replayIntro } from './scene/effects'
@@ -119,16 +119,10 @@ function Main({ visible }: { visible: boolean }) {
           <i />
           <button onClick={startReview} disabled={!count} title={count ? undefined : '添加回忆后可播放'}>年度回顾</button>
           <i />
-          <button
-            onClick={async () => {
-              posterUrl = await makePoster()
-              store.set({ sheet: 'share' })
-            }}
-          >
-            分享
-          </button>
+          <button onClick={openSave}>保存图片</button>
         </div>
       </nav>
+      <SavePrompt visible={visible} />
       <FxBar visible={visible} />
       <button
         className={`icon music${music ? ' playing' : ''}${on(visible)}`}
@@ -484,11 +478,51 @@ function AddSheet({ visible }: { visible: boolean }) {
   )
 }
 
+/** take a picture of the tree as it is now, and open the sheet to keep it */
+async function openSave() {
+  posterUrl = await makePoster()
+  store.set({ sheet: 'share' })
+}
+
+/** once the opening has finished, a gentle invitation to keep this moment, for a little while */
+function SavePrompt({ visible }: { visible: boolean }) {
+  const introDone = useStore((s) => s.introDone)
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    if (!introDone) return setShow(false)
+    const a = window.setTimeout(() => setShow(true), 3200)
+    const b = window.setTimeout(() => setShow(false), 15000)
+    return () => {
+      clearTimeout(a)
+      clearTimeout(b)
+    }
+  }, [introDone])
+  return (
+    <button className={`save-prompt${on(visible && show)}`} onClick={() => (setShow(false), openSave())}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z" />
+        <circle cx="12" cy="13.5" r="3.6" />
+      </svg>
+      保存这一刻
+    </button>
+  )
+}
+
 function ShareSheet({ visible }: { visible: boolean }) {
   const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
   useEffect(() => {
     if (visible) setNote('')
   }, [visible])
+  const save = async () => {
+    if (!posterUrl || saving) return
+    setSaving(true)
+    const r = await savePoster(posterUrl)
+    setSaving(false)
+    if (r === 'downloaded') setNote(mobile ? '已保存，可以在相册或"文件"里找到' : '已保存到下载文件夹')
+    else if (r === 'shared') setNote('已保存')
+    else if (r === 'longpress') setNote('长按上面的图片，选"保存图片"')
+  }
   const canShare = typeof navigator !== 'undefined' && !!navigator.share && !isWeChat
   const link = () => {
     const url = location.origin + location.pathname
@@ -506,12 +540,17 @@ function ShareSheet({ visible }: { visible: boolean }) {
     )
   }
   return (
-    <div className={`veil${on(visible)}`} role="dialog" aria-label="分享" aria-hidden={!visible}>
+    <div className={`veil${on(visible)}`} role="dialog" aria-label="保存图片" aria-hidden={!visible}>
       <button className="scrim" onClick={() => store.set({ sheet: null })} tabIndex={-1} aria-label="关闭" />
       <div className="veil-body">
         <div className="poster">{visible && posterUrl && <img src={posterUrl} alt="回忆树海报" />}</div>
-        <p className="lead">{isWeChat ? '长按保存，或点右上角转发' : '长按或右键保存'}</p>
+        <p className="lead">{isWeChat ? '长按图片，保存到相册' : '把这一刻存到手机里'}</p>
         <div className="veil-actions">
+          {!isWeChat && (
+            <button className="cta" onClick={save} disabled={saving}>
+              {saving ? '正在保存…' : '保存到手机'}
+            </button>
+          )}
           <button className="link" onClick={link}>
             {canShare ? '分享链接' : '复制链接'}
           </button>
